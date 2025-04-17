@@ -1,0 +1,129 @@
+version: "3.7"
+services:
+  api-gateway:
+    image: misnaged/api-gateway:latest
+    container_name: api-gateway
+    depends_on:
+      - delivery-service
+    environment:
+      HTTP_HOST: 0.0.0.0
+      REDIS_HOST: redis
+      MEALSAPI_HOST: meals-service
+      USERAPI_HOST: user-service
+      SMSAPI_HOST: sms-service
+      ORDERSAPI_HOST: orders-service
+      DELIVERYAPI_HOST: delivery-service
+    ports:
+      - "8080:8080"
+    networks:
+      - raccnet
+
+  delivery-service:
+    image: misnaged/delivery-service:latest
+    container_name: delivery-service
+    depends_on:
+      - meals-service
+    ports:
+      - "5432"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    networks:
+      - raccnet
+
+
+  meals-service:
+    image: misnaged/meals-service:latest
+    container_name: meals-service
+    depends_on:
+      - orders-service
+    ports:
+      - "5432"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    networks:
+      - raccnet
+
+  orders-service:
+    image: misnaged/orders-service:latest
+    container_name: orders-service
+    depends_on:
+      - sms-service
+    ports:
+      - "5432"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    networks:
+      - raccnet
+
+
+  sms-service:
+    image: misnaged/sms-service:latest
+    container_name: sms-service
+    depends_on:
+      - user-service
+    ports:
+      - "5432"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      SMSON: false # включает/выключает отправления смс для регистрации. По умолчанию отправка выключена (т.е. false)
+                   # SMSON Необязательный параметр для локальных тестов, так как check_phrase записывается в базу данных sms_db
+    networks:
+      - raccnet
+
+  user-service:
+    image: misnaged/user-service:latest
+    container_name: user-service
+    depends_on:
+      - redis
+    ports:
+      - "5432"
+      - "9098"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+    networks:
+      - raccnet
+
+  migrate:
+    image: migrate/migrate:latest
+    container_name: users-migrate
+    depends_on:
+      - postgres
+    volumes:
+      - ./db:/db
+    networks:
+      - raccnet
+    command: ["-path=/db/", "-database", "postgresql://serega:serega123@postgres:5432/raccoon?sslmode=disable", "up"]
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379"
+    networks:
+      - raccnet
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    volumes:
+      - ./data/postgres:/data/postgres
+    environment:
+      POSTGRES_HOST     : "127.0.0.1"
+      POSTGRES_PASSWORD : "serega123"
+      POSTGRES_USER     : "serega"
+      POSTGRES_DB       : "raccoon"
+      PGDATA            : "/data/postgres"
+    ports:
+      - "5432:5432"
+    networks:
+      - raccnet
+
+networks:
+  raccnet:

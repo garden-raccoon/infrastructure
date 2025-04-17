@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   validation_status text NOT NULL,
   first_name text,
   last_name text,
-  addresses text ARRAY,
+  addresses jsonb,
   avatar text,
   password text
 );
