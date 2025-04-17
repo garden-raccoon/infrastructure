@@ -17,7 +17,7 @@ job "sms-service" {
       driver = "docker"
       kill_timeout = "15s"
       env {
-        SMS_ON  = false
+        SMSON  = false
         DB_HOST = "0.0.0.0"
         DB_PORT = "5432"
          }
