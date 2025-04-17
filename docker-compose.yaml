@@ -82,7 +82,6 @@ services:
       - redis
     ports:
       - "5432"
-      - "9098"
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
