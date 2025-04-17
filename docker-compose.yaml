@@ -1,4 +1,3 @@
-version: "3.7"
 services:
   api-gateway:
     image: misnaged/api-gateway:latest
@@ -108,6 +107,12 @@ services:
     networks:
       - raccnet
 
+############ sleeper нужен только для первой инциализации postgres после того, как ./data/postgres были созданы
+############ сервис sleeper можно закомментить или удалить (лучше закомментить)
+  sleeper:
+    image: alpine
+    command: ["sh", "-c", "sleep 2"]
+###############################################
   postgres:
     image: postgres
     container_name: postgres
