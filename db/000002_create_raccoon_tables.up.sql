@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS orders_db (
     CONSTRAINT order_uuid_pkey PRIMARY KEY,
     user_uuid uuid NOT NULL,
     params jsonb,
-    order_status text NOT NULL,
+    order_status text,
     FOREIGN KEY (user_uuid) REFERENCES users ON DELETE CASCADE
 );
 
